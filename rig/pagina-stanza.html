@@ -1,0 +1,141 @@
+<meta charset="utf-8">
+<title>La stanza di Aphi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#EDEBE6;--ink:#141414;--ink-2:#55534E;--line:#C9C6BE;--chip:#E2E0D9;--chip-on:#141414;--chip-on-ink:#F3F1EC;--acc:#E8471C;--wall:#E4E2DC;--floor:#D9D6CE}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;padding-inline:16px;padding-block:14px 18px;min-height:100vh}
+.app{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-family:Syne,"IBM Plex Sans",sans-serif;font-weight:800;font-size:clamp(20px,5vw,26px);letter-spacing:-.02em;margin:0}
+.stato{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.stato b{color:var(--ink);font-weight:500}
+.btn{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;padding:7px 12px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.on{background:var(--chip-on);color:var(--chip-on-ink);border-color:var(--chip-on)}
+.btn:focus-visible,.tray button:focus-visible,.chat input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* la stanza: un cubo visto in prospettiva, disegnato con linee sottili */
+.room{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--wall);user-select:none;-webkit-user-select:none;touch-action:manipulation;cursor:pointer}
+.room svg.box{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.room .stage{position:absolute;overflow:visible;cursor:pointer;outline:none}
+.scene{position:absolute;left:0;top:0;width:1024px;height:1024px;transform-origin:0 0}
+.scene img{position:absolute;pointer-events:none;max-width:none;will-change:transform}
+.obj{position:absolute;pointer-events:none;transform:translate(-50%,-100%);transition:opacity .4s}
+.obj img{display:block;max-width:none}
+.tray{display:flex;gap:8px;overflow-x:auto;padding-block:2px;scrollbar-width:none}
+.tray::-webkit-scrollbar{display:none}
+.tray button{flex:0 0 auto;width:56px;height:56px;border:1px solid var(--line);border-radius:14px;background:var(--chip);display:grid;place-items:center;cursor:pointer;padding:0}
+.tray button:hover{border-color:var(--ink)}
+.tray button img{width:34px;height:34px;object-fit:contain}
+.tray .lab{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);align-self:center;padding-right:6px}
+/* barra per parlarci: una pillola, niente altro */
+.chat{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#F6F5F1;border-radius:999px;padding:6px 6px 6px 18px}
+.chat:focus-within{border-color:var(--ink)}
+.chat input{flex:1;min-width:0;border:0;background:transparent;font:400 16px/1.3 "IBM Plex Sans",system-ui,sans-serif;color:var(--ink);outline:none}
+.chat input::placeholder{color:var(--ink-2)}
+.chat button{width:40px;height:40px;border:0;border-radius:50%;background:var(--ink);color:var(--chip-on-ink);display:grid;place-items:center;cursor:pointer}
+.chat button:disabled{opacity:.35;cursor:default}
+.chat button svg{width:18px;height:18px}
+.log{display:flex;flex-direction:column;gap:4px;min-height:22px}
+.log .tu{font-size:13px;color:var(--ink-2);align-self:flex-end}
+.log .lui{font-size:14px;color:var(--ink)}
+/* cassetto con i comandi del rig (stessi id della pagina rig) */
+.drawer{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;background:#F1F0EB}
+.rig{display:grid;grid-template-columns:44px 1fr 44px;grid-template-rows:auto auto;gap:8px;align-items:center}
+.top{grid-column:2;grid-row:1;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+.pad{width:84px;height:84px;border:1px solid var(--line);border-radius:6px;position:relative;background:var(--chip);touch-action:none;cursor:crosshair}
+.pad .dot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--acc);left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
+.eyectl{display:flex;flex-direction:column;gap:4px;align-items:center}
+.eyectl input{width:120px}
+input[type=range]{accent-color:var(--acc)}
+.vs{grid-row:1;display:flex;align-items:center;justify-content:center}
+.vs input{writing-mode:vertical-lr;direction:rtl;height:84px;width:28px}
+.vs.l{grid-column:1}.vs.r{grid-column:3}
+.hs{grid-column:2;grid-row:2;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.hs input{width:22%;min-width:90px}
+label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;padding:6px 10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.chip.on{background:var(--chip-on);color:var(--chip-on-ink);border-color:var(--chip-on)}
+.note{font-size:13px;line-height:1.5;color:var(--ink-2);max-width:66ch;margin:0}
+.note b{color:var(--ink);font-weight:600}
+@media (prefers-reduced-motion:reduce){.obj{transition:none}}
+</style>
+<div class="app">
+  <header><h1>Aphelios</h1><div class="stato">stato <b id="stato">hi</b></div><button class="btn" id="rigBtn" type="button" aria-expanded="false">rig</button></header>
+  <div class="room" id="room" aria-label="La stanza di Aphi: tocca il pavimento e lui ci va">
+    <svg class="box" viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true">
+      <polygon points="0,300 400,300 328,165 72,165" fill="#D9D6CE"/>
+      <polygon points="0,0 72,165 0,300" fill="#DEDBD4"/>
+      <polygon points="400,0 328,165 400,300" fill="#DEDBD4"/>
+      <g fill="none" stroke="#B9B6AE" stroke-width="1" vector-effect="non-scaling-stroke">
+        <polyline points="0,0 72,165 328,165 400,0"/><line x1="72" y1="165" x2="0" y2="300"/><line x1="328" y1="165" x2="400" y2="300"/>
+      </g>
+    </svg>
+    <div id="objs"></div>
+    <div class="stage" id="stage" tabindex="0" aria-label="Aphelios"><div class="scene" id="scene"></div></div>
+  </div>
+  <div class="tray" id="tray"><span class="lab">dagli</span></div>
+  <div class="log" id="log" aria-live="polite"></div>
+  <form class="chat" id="chat" autocomplete="off"><input id="msg" type="text" placeholder="Scrivi ad Aphi" maxlength="200" aria-label="Scrivi ad Aphi"><button type="submit" id="send" aria-label="Manda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button></form>
+  <div class="drawer" id="drawer" hidden>
+    <div class="rig">
+      <div class="top">
+        <div class="pad" id="pad" title="testa e sguardo"><div class="dot" id="dot"></div></div>
+        <div class="eyectl"><label for="eye">occhi</label><input type="range" id="eye" min="0.5" max="1.6" step="0.01" value="1"><label for="near">vicinanza</label><input type="range" id="near" min="0" max="1" step="0.01" value="0"></div>
+      </div>
+      <div class="vs l"><input type="range" id="armL" min="-90" max="130" value="0" aria-label="braccio sinistro"></div>
+      <div class="vs r"><input type="range" id="armR" min="-90" max="130" value="0" aria-label="braccio destro"></div>
+      <div class="hs"><label for="elbL">gomito sx</label><input type="range" id="elbL" min="-130" max="60" value="0"><label for="elbR">gomito dx</label><input type="range" id="elbR" min="-130" max="60" value="0"><label for="ears">orecchie</label><input type="range" id="ears" min="-1" max="1" step="0.01" value="0"><label for="body">corpo</label><input type="range" id="body" min="-1" max="1" step="0.01" value="0"></div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <p class="note"><b>Stanza</b>: tocca il pavimento e ci va. <b>Dagli</b> una cosa e la usa. <b>Scrivigli</b> sotto. Qui dentro: i comandi del rig per provare e aggiungere.</p>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+__CORE__
+// ================= la stanza =================
+(function(){
+  const room=document.getElementById('room'), objs=document.getElementById('objs'), tray=document.getElementById('tray');
+  const drawer=document.getElementById('drawer'), rigBtn=document.getElementById('rigBtn');
+  rigBtn.addEventListener('click',()=>{ const on=drawer.hidden; drawer.hidden=!on; rigBtn.classList.toggle('on',on); rigBtn.setAttribute('aria-expanded',String(on)); });
+  // pavimento: u (0 sinistra .. 1 destra), v (0 fondo .. 1 davanti). Stessi numeri del poligono SVG (400x300)
+  const pos={u:0.5,v:0.55};
+  // fumetto della stanza (quello del rig e' dentro la scena e verrebbe minuscolo)
+  const bub=document.createElement('div'); bub.style.cssText='position:absolute;max-width:46%;background:#141414;color:#F3F1EC;font:600 14px/1.3 "IBM Plex Sans",system-ui,sans-serif;padding:8px 12px;border-radius:14px 14px 14px 4px;opacity:0;pointer-events:none;transform-origin:0 100%;z-index:9'; room.appendChild(bub);
+  function roomSay(t,ms=2800){ bub.textContent=t; const H=room.clientHeight; const p=floorXY(pos.u,pos.v); const side=H*0.78*p.s; bub.style.left=Math.min(room.clientWidth-160,p.x+side*0.28)+'px'; bub.style.top=Math.max(8,p.y-side*0.98)+'px'; gsap.killTweensOf(bub); gsap.fromTo(bub,{opacity:0,scale:.7},{opacity:1,scale:1,duration:.25,ease:'back.out(2)'}); gsap.to(bub,{opacity:0,duration:.3,delay:ms/1000}); }
+  Aphi.say=roomSay; AphiBrain.say=roomSay;
+  function floorXY(u,v){ const W=room.clientWidth,H=room.clientHeight; const y=(165+135*v)/300; const xl=(72*(1-v))/400, xr=(328+72*v)/400; return {x:(xl+(xr-xl)*u)*W, y:y*H, s:0.62+0.38*v}; }
+  function place(){ const H=room.clientHeight; const p=floorXY(pos.u,pos.v); const side=H*0.78*p.s; stage.style.width=stage.style.height=side+'px'; stage.style.left=(p.x-side/2)+'px'; stage.style.top=(p.y-side*(985/1024))+'px'; scene.style.transform=`scale(${side/1024})`; }
+  new ResizeObserver(place).observe(room); place();
+  // nella stanza cammina e corre solo sul pavimento (non con lo scorrimento del rig)
+  const w0=AphiBrain.weights.bind(AphiBrain); AphiBrain.weights=c=>{ const w=w0(c); w.walk=0; w.run=0; return w; };
+  // il core scala la scena sullo stage: qui lo rifaccio io (place) dopo ogni resize
+  let walking=null;
+  function walkTo(u,v,then){ if(walking) walking.kill(); const from={u:pos.u,v:pos.v}; const d=Math.hypot((u-from.u)*1.4,(v-from.v)); if(d<0.02){ then&&then(); return; }
+    const run=d>0.55; Aphi.play(run?'runPlace':'walkPlace'); const dir=(u>=from.u)?1:-1; setTimeout(()=>Aphi.setDir(dir),300);
+    walking=gsap.to(pos,{u,v,duration:d/(run?0.45:0.22),ease:'none',onUpdate:place,onComplete(){ walking=null; Aphi.setDir(1); if(then) then(); else Aphi.free(); }}); }
+  // il personaggio occupa la parte centrale del suo riquadro: li' si accarezza/si clicca, fuori si cammina
+  window.AphiHit=e=>{ const r=stage.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height; return x>0.24&&x<0.76&&y>0.05&&y<0.97; };
+  room.addEventListener('pointerdown',e=>{ if(e.target.closest('.stage')&&window.AphiHit(e)) return; const r=room.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width*400, y=(e.clientY-r.top)/r.height*300; if(y<165) return;
+    const v=(y-165)/135; const xl=72*(1-v), xr=328+72*v; const u=Math.max(0.05,Math.min(0.95,(x-xl)/(xr-xl))); walkTo(u,v); });
+  // oggetti da dare: appaiono sul pavimento, lui ci va e li usa
+  const GIVE=[['biscotto','dealer','biscotto'],['tazza','coffee','caffè'],['controller','game','gioco'],['laptop','laptop','laptop'],['cuffie','music','musica'],['cuscino','sleep','pisolino']];
+  for(const [name,state,lab] of GIVE){ const b=document.createElement('button'); b.type='button'; b.title=lab; b.setAttribute('aria-label',lab); const i=new Image(); i.src=D.objs[name].src; i.alt=''; b.appendChild(i); tray.appendChild(b);
+    b.addEventListener('click',()=>{ const u=0.2+Math.random()*0.6, v=0.25+Math.random()*0.7; const p=floorXY(u,v); const o=document.createElement('div'); o.className='obj'; const im=new Image(); im.src=D.objs[name].src; im.style.width=(room.clientHeight*0.14*p.s)+'px'; o.appendChild(im); o.style.left=p.x+'px'; o.style.top=p.y+'px'; o.style.opacity='0'; objs.appendChild(o); requestAnimationFrame(()=>o.style.opacity='1');
+      walkTo(u,v,()=>{ o.style.opacity='0'; setTimeout(()=>o.remove(),450); Aphi.play(state); const ms={sleep:14000,music:9000,laptop:12000}[state]||0; if(ms) setTimeout(()=>{ if(Aphi.state===state) Aphi.free(); },ms); }); }); }
+  // parlarci: risposte locali, stocastiche; il gancio per Groq/Gemini e' window.AphiChat
+  const log=document.getElementById('log'), form=document.getElementById('chat'), msg=document.getElementById('msg');
+  const RULES=[[/ciao|hey|ehi|buongiorno|buonasera/,'hi',['Ciao!','Ehi.','Ciao ciao.','Eccomi.']],[/biscott|fame|mangi/,'dealer',['Biscotto!','Sì grazie.','Gnam.']],[/dorm|nanna|sonno|stanco/,'sleep',['Cinque minuti.','Zzz.','Solo un attimo...']],[/corr|veloce|scappa/,'run',['Vado!','Zoom.']],[/cammin|passegg|muovi/,'walk',['Passeggiata.','Vado un po\' in giro.']],[/sied|seduto|riposa/,'sit',['Mi siedo.','Ok, un attimo qui.']],[/music|canzon|cuffie/,'music',['Musica.','Questa spacca.']],[/caff|bevi/,'coffee',['Caffè, finalmente.','Nero, grazie.']],[/gioc|valorant|partita/,'game',['Una partita.','Solo una.']],[/lavor|pc|codice|scriv/,'laptop',['Al lavoro.','Ok, scrivo.']],[/mazz|arrabbi|nemic/,'bat',['Chi devo sistemare?','Dimmi chi.']],[/amor|ti voglio|bello|carino/,'love',['Anch\'io.','Lo so.','Dai...']],[/triste|piang/,'sad',['Ho un po\' di tristezza.','Sniff.']],[/come stai|tutto bene/,null,['Bene, e tu?','Curioso oggi.','Sono un po\' pigro.']],[/chi sei|come ti chiami|nome/,null,['Aphelios. Per gli amici Aphi.','Aphi.']],[/pens|idea|secondo te/,'think',['Mmm.','Fammi pensare.']],[/wow|incredib|pazzesc/,'wow',['Wow.','Non ci credo.']],[/brav|grande|ottimo|perfetto/,'thumbs',['Grande.','Top.','Così si fa.']],[/non lo so|boh|chiss|forse/,'shrug',['Boh.','Chi lo sa.','Mah.']],[/evviva|festa|vittoria|ce l'?abbiamo fatta|yes/,'jump',['Evviva!','Sì!','Grande!']],[/uffa|noia|che palle|basta/,'annoyed',['Uffa.','Che noia.','Mh.']],[/fiero|orgoglio|campione|il migliore/,'proud',['Ovvio.','Lo so.','Eh.']]];
+  const QUIPS=['Mmh.','Dimmi.','Ok.','Va bene.','Sì?','Ascolto.','Interessante.','Capito.'];
+  window.AphiChat=async function(text){ const t=text.toLowerCase(); for(const [re,state,answers] of RULES){ if(re.test(t)) return {text:answers[Math.floor(Math.random()*answers.length)],state}; } return {text:QUIPS[Math.floor(Math.random()*QUIPS.length)],state:Math.random()<0.3?'think':null}; };
+  function line(cls,t){ const d=document.createElement('div'); d.className=cls; d.textContent=t; log.appendChild(d); while(log.children.length>2) log.firstChild.remove(); }
+  form.addEventListener('submit',async e=>{ e.preventDefault(); const t=msg.value.trim(); if(!t) return; msg.value=''; line('tu',t); const r=await window.AphiChat(t); line('lui','Aphi: '+r.text); Aphi.say(r.text); if(r.state){ Aphi.play(r.state); const ms={sleep:14000,music:9000,laptop:12000,sit:10000,walk:7000,run:4000,sad:6000,peek:5000}[r.state]; if(ms) setTimeout(()=>{ if(Aphi.state===r.state) Aphi.free(); },ms); } });
+  // ogni tanto, da solo, fa un giro per la stanza
+  setInterval(()=>{ if(Aphi.state==='idle'&&!walking&&Math.random()<0.25) walkTo(0.15+Math.random()*0.7,0.2+Math.random()*0.75); },9000);
+})();
+</script>

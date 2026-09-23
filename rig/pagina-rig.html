@@ -1,0 +1,57 @@
+<meta charset="utf-8">
+<title>Aphelios Rig</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#EDEBE6;--ink:#141414;--ink-2:#55534E;--line:#C9C6BE;--chip:#E2E0D9;--chip-on:#141414;--chip-on-ink:#F3F1EC;--acc:#E8471C}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;padding-inline:16px;padding-block:18px 32px;min-height:100vh}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:Syne,"IBM Plex Sans",sans-serif;font-weight:800;font-size:clamp(22px,6vw,30px);letter-spacing:-.02em;margin:0}
+.stato{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.stato b{color:var(--ink);font-weight:500}
+.rig{display:grid;grid-template-columns:44px 1fr 44px;grid-template-rows:auto 1fr auto;gap:8px;align-items:stretch}
+.top{grid-column:2;grid-row:1;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+.pad{width:96px;height:96px;border:1px solid var(--line);border-radius:6px;position:relative;background:var(--chip);touch-action:none;cursor:crosshair}
+.pad .dot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--acc);left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
+.eyectl{display:flex;flex-direction:column;gap:4px;align-items:center}
+.eyectl input{width:120px}
+.stage{grid-column:2;grid-row:2;position:relative;width:100%;aspect-ratio:1;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;cursor:pointer;outline:none}
+.stage:focus-visible{box-shadow:0 0 0 2px var(--ink)}
+.scene{position:absolute;left:0;top:0;width:1024px;height:1024px;transform-origin:0 0}
+.scene img{position:absolute;pointer-events:none;max-width:none;will-change:transform}
+input[type=range]{accent-color:var(--acc)}
+.vs{grid-row:2;display:flex;align-items:center;justify-content:center}
+.vs input{writing-mode:vertical-lr;direction:rtl;height:70%;width:28px}
+.vs.l{grid-column:1}.vs.r{grid-column:3}
+.hs{grid-column:2;grid-row:3;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.hs input{width:22%;min-width:90px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;padding:7px 11px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.chip.on{background:var(--chip-on);color:var(--chip-on-ink);border-color:var(--chip-on)}
+.note{font-size:13px;line-height:1.5;color:var(--ink-2);max-width:66ch;margin:0}
+.note b{color:var(--ink);font-weight:600}
+@media (max-width:480px){.rig{grid-template-columns:34px 1fr 34px}.vs input{width:24px}}
+</style>
+<div class="wrap">
+  <header><h1>Aphelios</h1><div class="stato">stato <b id="stato">hi</b></div></header>
+  <div class="rig">
+    <div class="top">
+      <div class="pad" id="pad" title="testa e sguardo"><div class="dot" id="dot"></div></div>
+      <div class="eyectl"><label for="eye">occhi</label><input type="range" id="eye" min="0.5" max="1.6" step="0.01" value="1"><label for="near">vicinanza</label><input type="range" id="near" min="0" max="1" step="0.01" value="0"></div>
+    </div>
+    <div class="vs l"><input type="range" id="armL" min="-90" max="110" value="0" aria-label="braccio sinistro"></div>
+    <div class="stage" id="stage" tabindex="0" aria-label="Aphelios, la mascotte di WhyEd"><div class="scene" id="scene"></div></div>
+    <div class="vs r"><input type="range" id="armR" min="-90" max="110" value="0" aria-label="braccio destro"></div>
+    <div class="hs"><label for="elbL">gomito sx</label><input type="range" id="elbL" min="-130" max="60" value="0"><label for="elbR">gomito dx</label><input type="range" id="elbR" min="-130" max="60" value="0"><label for="ears">orecchie</label><input type="range" id="ears" min="-1" max="1" step="0.01" value="0"><label for="body">corpo</label><input type="range" id="body" min="-1" max="1" step="0.01" value="0"></div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <p class="note"><b>Trackpad</b>: dove guarda, con la prospettiva (l'occhio vicino cresce, quello lontano si abbassa). <b>Occhi</b>: quanto sono grandi, il suo modo di esprimersi. <b>Vicinanza</b>: si sporge verso di te. Slider ai lati: braccia. Sotto: orecchie e corpo. <b>Passaci sopra</b>: petting. <b>Clic</b>: biscotto. <b>Tieni premuto</b>: si arrabbia. <b>Doppio clic</b>: schiaffo. <b>Tasto destro</b>: mazza. Lasciato solo dorme, se esci dalla pagina sbircia.</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+__CORE__
+</script>
